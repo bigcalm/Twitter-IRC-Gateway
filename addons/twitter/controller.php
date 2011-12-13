@@ -1,7 +1,7 @@
 <?php
 require_once('PHP/Fork.php');
 
-require_once('abraham-twitteroauth-7f0962f/twitteroauth/twitteroauth.php');
+require_once('abraham-twitteroauth/twitteroauth/twitteroauth.php');
 
 class addonTwitter extends botController
 {
