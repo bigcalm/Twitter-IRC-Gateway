@@ -109,6 +109,24 @@ class addonFactoid extends botController
 		}
 	}
 	
+	
+	function random(&$irc, &$data)
+	{
+		global $tigBase;
+		
+		$triggerSelectSql = 'SELECT * FROM factoids WHERE is_active = 1 GROUP BY `trigger` ORDER BY RAND() LIMIT 0,1;';
+		$queryResult = $this->mdb2->query($triggerSelectSql);
+		
+		if ($data->channel != '')
+			$sendTo = $data->channel;
+		else
+			$sendTo = $data->nick;
+		
+		while ($queryResult && $factRow = $queryResult->fetchRow(MDB2_FETCHMODE_ASSOC))
+		{
+			$irc->message($data->type, $sendTo, "Info about " . $factRow['trigger'] . ": " . $factRow['content']);
+		}
+	}
 }
 
 $addonFactoid = new addonFactoid();
@@ -116,4 +134,5 @@ $addonFactoid = new addonFactoid();
 $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE|SMARTIRC_TYPE_CHANNEL,'^!learn', $addonFactoid, 'learn');
 $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE|SMARTIRC_TYPE_CHANNEL,'^!forget', $addonFactoid, 'forget');
 $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE|SMARTIRC_TYPE_CHANNEL,'^!info', $addonFactoid, 'info');
+$irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE|SMARTIRC_TYPE_CHANNEL,'^!random fact', $addonFactoid, 'random');
 

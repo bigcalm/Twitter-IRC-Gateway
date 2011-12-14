@@ -78,6 +78,10 @@ factoids (addon):
 		action: delivers the facoid linked to the given trigger
 		public use
 	
+	- !random fact
+		method: notice, private message or public channel
+		action: delivers a random, active, factoid to the user or channel
+		public use
 
 twitter (addon):
 	- twitter oauth register
