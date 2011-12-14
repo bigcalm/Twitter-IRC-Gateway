@@ -7,6 +7,7 @@ class addonFactoid extends botController
 	private $mdb2_dsn;
 	private $mdb2_options;
 	private $mdb2;
+	private $table_prefix;
 	
 	public function setMdb2Dsn($mdb2_dsn) { $this->mdb2_dsn = $mdb2_dsn; }
 	public function getMdb2Dsn() { return $this->mdb2_dsn; }
@@ -14,6 +15,10 @@ class addonFactoid extends botController
 	
 	public function setMdb2Options($mdb2_options) { $this->mdb2_options = $mdb2_options; }
 	public function getMdb2Options() { return $this->mdb2_options; }
+	
+	
+	public function setTablePrefix($table_prefix) { $this->table_prefix = $table_prefix; }
+	public function getTablePrefix() { return $this->table_prefix; }
 	
 	
 	function __construct()
@@ -52,7 +57,7 @@ class addonFactoid extends botController
 		$trigger = trim(substr($message, 0, $firstEqualPos));
 		$fact = trim(substr($message, $firstEqualPos + 1));
 		
-		$replaceSql = 'INSERT INTO factoids SET `trigger` = "' . $this->mdb2->escape($trigger) . '", `content` = "' . $this->mdb2->escape($fact) . '", `created_by` = "' . $this->mdb2->escape($data->nick) . '"';
+		$replaceSql = 'INSERT INTO ' . $this->getTablePrefix() . 'factoids SET `trigger` = "' . $this->mdb2->escape($trigger) . '", `content` = "' . $this->mdb2->escape($fact) . '", `created_by` = "' . $this->mdb2->escape($data->nick) . '"';
 		$queryResult = $this->mdb2->query($replaceSql);
 		
 		if ($data->channel != '')
@@ -76,7 +81,7 @@ class addonFactoid extends botController
 		$message = preg_replace("/^!forget /", '', $data->message);
 		$trigger = trim($message);
 		
-		$deleteSql = 'UPDATE factoids SET `is_active` = 0 WHERE `trigger` = "' . $this->mdb2->escape($trigger) . '"';
+		$deleteSql = 'UPDATE ' . $this->getTablePrefix() . 'factoids SET `is_active` = 0 WHERE `trigger` = "' . $this->mdb2->escape($trigger) . '"';
 		$queryResult = $this->mdb2->query($deleteSql);
 		
 		if ($data->channel != '')
@@ -95,7 +100,7 @@ class addonFactoid extends botController
 		$message = preg_replace("/^!info /", '', $data->message);
 		$trigger = trim($message);
 		
-		$selectSql = 'SELECT * FROM factoids WHERE `is_active` = 1 AND `trigger` = "' . $this->mdb2->escape($trigger) . '" ORDER BY `created_at` DESC LIMIT 1';
+		$selectSql = 'SELECT * FROM ' . $this->getTablePrefix() . 'factoids WHERE `is_active` = 1 AND `trigger` = "' . $this->mdb2->escape($trigger) . '" ORDER BY `created_at` DESC LIMIT 1';
 		$queryResult = $this->mdb2->query($selectSql);
 		
 		if ($data->channel != '')
@@ -114,8 +119,11 @@ class addonFactoid extends botController
 	{
 		global $tigBase;
 		
-		$triggerSelectSql = 'SELECT * FROM factoids WHERE is_active = 1 GROUP BY `trigger` ORDER BY RAND() LIMIT 0,1;';
+		$triggerSelectSql = 'SELECT * FROM ' . $this->getTablePrefix() . 'factoids WHERE is_active = 1 GROUP BY `trigger` ORDER BY RAND() LIMIT 0,1;';
 		$queryResult = $this->mdb2->query($triggerSelectSql);
+		if (PEAR::isError($queryResult)) {
+			return true;
+		}
 		
 		if ($data->channel != '')
 			$sendTo = $data->channel;
