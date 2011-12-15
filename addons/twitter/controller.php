@@ -165,7 +165,7 @@ class addonTwitter extends botController
 		if (!$tigBase->isTrustedUser($data->nick))
 			return $tigBase->restrictedError($irc, $data);
 		
-		$this->startTwitter(false);
+		$this->startTwitter(&$irc, &$data);
 	}
 	
 	function startTwitter(&$irc, &$data)
