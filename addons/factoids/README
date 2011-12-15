@@ -1,0 +1,22 @@
+IRC Commands
+============
+factoids (addon):
+	- !learn <trigger> = <factoid>
+		method: notice, private message or public channel
+		action: records the given factoid against the given trigger
+		trusted users only
+	
+	- !forget <trigger>
+		method: notice, private message or public channel
+		action: de-activates a given trigger but does not delete the entry from the factoid database
+		trusted users only
+	
+	- !info <trigger>
+		method: notice, private message or public channel
+		action: delivers the facoid linked to the given trigger
+		public use
+	
+	- !random fact
+		method: notice, private message or public channel
+		action: delivers a random, active, factoid to the user or channel
+		public use

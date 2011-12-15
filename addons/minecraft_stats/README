@@ -1,0 +1,7 @@
+IRC Commands
+============
+minecraft stats (addon):
+	- !mcstats <minecraft username>
+		method: notice, private message or public channel
+		action: displays connection stats for a given minecraft user
+		public use

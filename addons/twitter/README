@@ -1,0 +1,22 @@
+IRC Commands
+============
+twitter (addon):
+	- twitter oauth register
+		method: notice or private message
+		action: begin the authentication process with twitter
+		trusted users only
+	
+	- twitter oauth validate <pin>
+		method: notice or private message
+		action: validate a twitter account for use in gating tweets
+		trusted users only
+	
+	- twitter stream start
+		method: notice or private message
+		action: starts the gating of tweets to the configured channel
+		trusted users only
+	
+	- twitter stream stop
+		method: notice or private message
+		action: stops the gating of tweets to the configured channel
+		trusted users only
