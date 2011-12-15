@@ -18,6 +18,10 @@ class addonTwitter extends botController
 	
 	private $displayTweetId;
 	
+	private $auto_start;
+	
+	public $autoStartTweetsId;
+	
 	var $forked_process;
 	
 	public function setChannel($channel) { $this->channel = $channel; }
@@ -50,6 +54,14 @@ class addonTwitter extends botController
 	
 	private function setForkedProcess($forked_process) { $this->forked_process = $forked_process; }
 	private function getForkedProcess() { return $this->forked_process; }
+	
+	
+	public function setAutoStart($autoStart) { $this->auto_start = $autoStart; }
+	public function getAutoStart() { return $this->auto_start; }
+	
+	
+	public function setAutoStartTweetsId($autoStartTweetsId) { $this->autoStartTweetsId = $autoStartTweetsId; }
+	public function getAutoStartTweetsId() { return $this->autoStartTweetsId; }
 	
 	
 	function __construct()
@@ -153,10 +165,24 @@ class addonTwitter extends botController
 		if (!$tigBase->isTrustedUser($data->nick))
 			return $tigBase->restrictedError($irc, $data);
 		
+		$this->startTwitter(false);
+	}
+	
+	function startTwitter(&$irc, &$data)
+	{
+		global $tigBase;
 		
 		if ($this->getAuthToken() == '' || $this->getTokenSecret() == '')
 		{
-			$irc->message($data->type, $data->nick, "I do not yet have the correct Twitter OAuth details to be able to stream tweets.  Please run: twitter oauth register");
+			if ($this->getAutoStart())
+			{
+				if (DEBUG)
+					echo "[" . date("Y-M-D H:i:s") . "] I do not yet have the correct Twitter OAuth details to be able to stream tweets.  Please run: twitter oauth register";
+			}
+			else
+			{
+				$irc->message($data->type, $data->nick, "I do not yet have the correct Twitter OAuth details to be able to stream tweets.  Please run: twitter oauth register");
+			}
 			return true;
 		}
 		
@@ -166,7 +192,15 @@ class addonTwitter extends botController
 		
 		if (is_object($this->getForkedProcess()))
 		{
-			$irc->message($data->type, $data->nick, "I am already gating tweets. Use 'twitter stop' to stop.");
+			if ($this->getAutoStart())
+			{
+				if (DEBUG)
+					echo "[" . date("Y-M-D H:i:s") . "] I am already gating tweets. Use 'twitter stop' to stop.";
+			}
+			else
+			{
+				$irc->message($data->type, $data->nick, "I am already gating tweets. Use 'twitter stop' to stop.");
+			}
 			return true;
 		}
 		
@@ -175,12 +209,24 @@ class addonTwitter extends botController
 		$tigBase->setVar('last_message_displayed', TRUE);
 		$tigBase->setVar('last_message', 'start');
 		
-		$irc->message($data->type, $this->getChannel(), "Now gating tweets to IRC for these users: " . join (', ' , $this->getFriends()));
+		if ($this->getAutoStart())
+		{
+			if (DEBUG)
+			echo "[" . date("Y-M-D H:i:s") . "] Now gating tweets to IRC for these users: " . join (', ' , $this->getFriends());
+		}
+		else
+		{
+			$irc->message($data->type, $this->getChannel(), "Now gating tweets to IRC for these users: " . join (', ' , $this->getFriends()));
+		}
+		
 		
 		$twitterThread = new executeThread('twitterThread');
 		$twitterThread->start();
 		
 		$this->setForkedProcess($twitterThread);
+		
+		$this->setAutoStart(false);
+		$irc->unregisterTimeid($this->getAutoStartTweetsId());
 	}
 	
 	
@@ -328,3 +374,8 @@ $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE, '^twitter 
 $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE, '^twitter stream start', $addonTwitter, 'twitterStreamStart');
 $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE, '^twitter stream stop', $addonTwitter, 'twitterStreamStop');
 $irc->registerActionhandler(SMARTIRC_TYPE_QUERY|SMARTIRC_TYPE_NOTICE, '^twitter info', $addonTwitter, 'twitterInfo');
+
+if ($addonTwitter->getAutoStart() == true)
+{
+	$addonTwitter->setAutoStartTweetsId($irc->registerTimehandler(5000, $addonTwitter, 'startTwitter'));
+}

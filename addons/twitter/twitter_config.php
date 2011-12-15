@@ -11,6 +11,8 @@ $this->setFriends(array(
 ));
 $this->setChannel('#ubuntu-uk-minecraft');
 
+$this->setAutoStart(true); // setting to true will only work if oauth has been completed
+
 // You shouldn't need to edit the settings below:
 
 $this->setAuthFile("tig.oauth.txt");
