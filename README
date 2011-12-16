@@ -56,7 +56,7 @@ Bot core:
 		action: joins a given channel only if it is in the list of useable channels
 		trusted users only
 	
-	- leave <#channe>
+	- leave <#channel>
 		method: notice or private message
 		action: leaves a given channel only if it is in the list of useable channels
 		trusted users only
