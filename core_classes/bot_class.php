@@ -2,7 +2,7 @@
 class tigBase
 {
 	protected $trustedUsers = array();
-	var $variables;
+	public $variables;
 	
 	// -- Object setting functions --
 	public function setTrustedUsers($trustedUsers)

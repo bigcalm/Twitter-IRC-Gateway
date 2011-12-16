@@ -22,7 +22,7 @@ class addonTwitter extends botController
 	
 	public $autoStartTweetsId;
 	
-	var $forked_process;
+	public $forked_process;
 	
 	public function setChannel($channel) { $this->channel = $channel; }
 	public function getChannel() { return $this->channel; }
@@ -289,7 +289,7 @@ class addonTwitter extends botController
 
 class executeThread extends PHP_Fork {
 	
-	var $last_message;
+	public $last_message;
 	
 	function executeThread($name)
 	{
