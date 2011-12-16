@@ -90,7 +90,7 @@ class addonTwitter extends botController
 	}
 	
 	// -- bot commands --
-	function twitterOauthRegister(&$irc, &$data)
+	function twitterOauthRegister($irc, $data)
 	{
 		global $tigBase;
 		
@@ -113,7 +113,7 @@ class addonTwitter extends botController
 	}
 	
 	
-	function twitterOauthValidate(&$irc, &$data)
+	function twitterOauthValidate($irc, $data)
 	{
 		global $tigBase;
 		
@@ -158,17 +158,17 @@ class addonTwitter extends botController
 	}
 	
 	
-	function twitterStreamStart(&$irc, &$data)
+	function twitterStreamStart($irc, $data)
 	{
 		global $tigBase;
 		
 		if (!$tigBase->isTrustedUser($data->nick))
 			return $tigBase->restrictedError($irc, $data);
 		
-		$this->startTwitter(&$irc, &$data);
+		$this->startTwitter($irc, $data);
 	}
 	
-	function startTwitter(&$irc, &$data)
+	function startTwitter($irc, $data)
 	{
 		global $tigBase;
 		
@@ -216,7 +216,7 @@ class addonTwitter extends botController
 		}
 		else
 		{
-			$irc->message($data->type, $this->getChannel(), "Now gating tweets to IRC for these users: " . join (', ' , $this->getFriends()));
+			$irc->message($data->type, $data->nick, "Now gating tweets to IRC for these users: " . join (', ' , $this->getFriends()));
 		}
 		
 		
@@ -230,7 +230,7 @@ class addonTwitter extends botController
 	}
 	
 	
-	function twitterStreamStop(&$irc, &$data)
+	function twitterStreamStop($irc, $data)
 	{
 		global $tigBase;
 		
@@ -249,11 +249,11 @@ class addonTwitter extends botController
 		$twitterThread->stop();
 		
 		$this->setForkedProcess(FALSE);
-		$irc->message($data->type, $this->getChannel(), "Gating tweets to IRC has been disabled.");
+		$irc->message($data->type, $data->nick, "Gating tweets to IRC has been disabled.");
 	}
 	
 	
-	function displayTweet(&$irc)
+	function displayTweet($irc)
 	{
 		if (is_object($this->getForkedProcess()))
 		{
@@ -276,7 +276,7 @@ class addonTwitter extends botController
 	}
 	
 	
-	function twitterInfo(&$irc)
+	function twitterInfo($irc)
 	{
 		echo "\n --- Debug info ---\n";
 		print_r($this);

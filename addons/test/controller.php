@@ -1,13 +1,13 @@
 <?php
 class addonExample extends botController
 {
-	function channel_test(&$irc, &$data)
+	function channel_test($irc, $data)
 	{
 		global $tigBase;
 		$irc->message(SMARTIRC_TYPE_CHANNEL, $data->channel, $data->nick . ": no I don't like tests!");
 	}
 	
-	function query_test(&$irc, &$data)
+	function query_test($irc, $data)
 	{
 		global $tigBase;
 		

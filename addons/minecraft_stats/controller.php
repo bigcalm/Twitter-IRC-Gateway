@@ -48,7 +48,7 @@ class addonMinecraftStats extends botController
 	}
 	
 	
-	public function manageLine(&$irc, &$data)
+	public function manageLine($irc, $data)
 	{
 		global $tigBase;
 		
@@ -105,7 +105,7 @@ class addonMinecraftStats extends botController
 	}
 	
 	
-	public function displayStats(&$irc, &$data)
+	public function displayStats($irc, $data)
 	{
 		global $tigBase;
 		
@@ -123,6 +123,7 @@ class addonMinecraftStats extends botController
 		}
 		else
 		{
+			return true;
 			// all user stats required
 			$mcUsernamesSql = 'SELECT user_nick FROM ' . $this->getTablePrefix() . 'minecraft_stats GROUP BY user_nick ORDER BY user_nick ASC;';
 			$queryResult = $this->mdb2->query($mcUsernamesSql);

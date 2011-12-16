@@ -35,7 +35,7 @@ class tigBase
 	}
 	
 	
-	public function restrictedError(&$irc, &$data)
+	public function restrictedError($irc, $data)
 	{
 		$irc->message(SMARTIRC_TYPE_NOTICE, $data->nick, "I'm very sorry, but I cannot do that as you are not in my list of trusted users.");
 		return false;
@@ -82,7 +82,7 @@ class tigBase
 
 class botController extends tigBase
 {
-	public function quit(&$irc, &$data)
+	public function quit($irc, $data)
 	{
 		global $tigBase;
 		
@@ -102,7 +102,7 @@ class botController extends tigBase
 	}
 	
 	
-	public function changeNick(&$irc, &$data)
+	public function changeNick($irc, $data)
 	{
 		global $tigBase;
 		
@@ -122,7 +122,7 @@ class botController extends tigBase
 	}
 	
 	
-	public function channelAdd(&$irc, &$data)
+	public function channelAdd($irc, $data)
 	{
 		global $tigBase;
 		
@@ -151,7 +151,7 @@ class botController extends tigBase
 	}
 	
 	
-	public function channelRemove(&$irc, &$data)
+	public function channelRemove($irc, $data)
 	{
 		global $tigBase;
 		
@@ -187,7 +187,7 @@ class botController extends tigBase
 	}
 	
 	
-	public function channelList(&$irc, &$data)
+	public function channelList($irc, $data)
 	{
 		global $tigBase;
 		
@@ -199,7 +199,7 @@ class botController extends tigBase
 	}
 	
 	
-	public function joinChannel(&$irc, &$data)
+	public function joinChannel($irc, $data)
 	{
 		global $tigBase;
 		
@@ -227,7 +227,7 @@ class botController extends tigBase
 	}
 	
 	
-	public function leaveChannel(&$irc, &$data)
+	public function leaveChannel($irc, $data)
 	{
 		global $tigBase;
 		

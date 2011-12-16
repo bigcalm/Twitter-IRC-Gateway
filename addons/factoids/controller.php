@@ -38,7 +38,7 @@ class addonFactoid extends botController
 	}
 	
 	
-	function learn(&$irc, &$data)
+	function learn($irc, $data)
 	{
 		global $tigBase;
 		
@@ -65,13 +65,13 @@ class addonFactoid extends botController
 		else
 			$sendTo = $data->nick;
 		
-		$irc->message($data->type, $sendTo, "I now know that " . $trigger . " = " . $fact);
-		$irc->message($data->type, $sendTo, "This information can be retrieved with: !info " . $trigger);
-		$irc->message($data->type, $sendTo, "If you need to remove it, use: !forget " . $trigger);
+		$irc->message($data->type, $data->nick, "I now know that " . $trigger . " = " . $fact);
+		$irc->message($data->type, $data->nick, "This information can be retrieved with: !info " . $trigger);
+		$irc->message($data->type, $data->nick, "If you need to remove it, use: !forget " . $trigger);
 	}
 	
 	
-	function forget(&$irc, &$data)
+	function forget($irc, $data)
 	{
 		global $tigBase;
 		
@@ -93,7 +93,7 @@ class addonFactoid extends botController
 	}
 	
 	
-	function info(&$irc, &$data)
+	function info($irc, $data)
 	{
 		global $tigBase;
 		
@@ -115,7 +115,7 @@ class addonFactoid extends botController
 	}
 	
 	
-	function random(&$irc, &$data)
+	function random($irc, $data)
 	{
 		global $tigBase;
 		
