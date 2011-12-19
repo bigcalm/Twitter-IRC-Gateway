@@ -11,5 +11,5 @@ $this->setMdb2Options(array());
 $this->setTablePrefix('');
 
 $this->setFriends(array(
-	'clamps_',
+	'clampsbot',
 ));

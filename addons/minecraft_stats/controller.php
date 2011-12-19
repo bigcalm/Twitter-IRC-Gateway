@@ -48,7 +48,7 @@ class addonMinecraftStats extends botController
 	}
 	
 	
-	public function manageLine($irc, $data)
+	public function manageConnection($irc, $data)
 	{
 		global $tigBase;
 		
@@ -187,6 +187,22 @@ class addonMinecraftStats extends botController
 		
 		
 		
+	// -- calculate total deaths
+		$deathStatsSql = 'SELECT COUNT(*) AS deaths FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" AND `action` = "death";';
+		$queryResult = $this->mdb2->query($deathStatsSql);
+		
+		if (PEAR::isError($queryResult)) {
+			$irc->message($data->type, $sendTo, "There was an error while fetching death data on " . $mcUser);
+			return true;
+		}
+		
+		while ($queryResult && $statsRow = $queryResult->fetchRow(MDB2_FETCHMODE_ASSOC))
+		{
+			$displayResults[] = 'Deaths: ' . $statsRow['deaths'];
+		}
+		
+		
+		
 	// -- calculate total time connected
 		$connectionTimesSql = 'SELECT * FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" ORDER BY created_at ASC;';
 		$queryResult = $this->mdb2->query($connectionTimesSql);
@@ -209,9 +225,12 @@ class addonMinecraftStats extends botController
 			}
 			if ($connectionTimeRow['action'] == 'disconnection')
 			{
-				// skip double disconnection entries
-				if (isset($connectionTimePairs[$counter]['disconnection']))
+				// skip disconnection without a connection
+				if (!isset($connectionTimePairs[$counter]['connection']))
+				{
+					unset($connectionTimePairs[$counter]);
 					continue;
+				}
 				
 				$connectionTimePairs[$counter]['disconnection'] = $connectionTimeRow['created_at'];
 			}
@@ -239,10 +258,71 @@ class addonMinecraftStats extends botController
 		
 		return $displayResults;
 	}
+	
+	
+	public function death($irc, $data)
+	{
+		$botNick = $data->nick;
+		$mcUser = $data->messageex[0];
+		$meansOfDeath = trim(preg_replace("/^" . $mcUser . "/", "", $data->message));
+		$this->recordDeath($botNick, $mcUser, $meansOfDeath);
+	}
+	
+	
+	public function deathMob($irc, $data)
+	{
+		$botNick = $data->nick;
+		$mcUser = $data->messageex[0];
+		$secondEntity = $data->messageex[count($data->messageex) - 1];
+		$meansOfDeath = trim(preg_replace("/^" . $mcUser . "/", "", $data->message));
+		$meansOfDeath = trim(preg_replace("/" . $secondEntity . "$/", "", $data->message));
+		$this->recordDeath($botNick, $mcUser, $meansOfDeath, $secondEntity);
+	}
+	
+	
+	private function recordDeath($botNick, $mcUser, $meansOfDeath, $secondEntity = false)
+	{
+		$deathSql = 'INSERT INTO ' . $this->getTablePrefix() . 'minecraft_stats SET bot_name = "' . $this->mdb2->escape($botNick). '", user_nick = "' . $this->mdb2->escape($mcUser). '", `action` = "death", notes = "' . $this->mdb2->escape($meansOfDeath) . '"';
+		
+		if ($secondEntity !== false)
+			$deathSql .= ', secondEntity = "' . $this->mdb2->escape($secondEntity) . '"';
+		
+		$deathSql .= ';';
+		
+		$deathRes = $this->mdb2->query($deathSql);
+		if (DEBUG)
+			echo "[" . date("Y-M-D H:i:s") . "] Minecraft Addon: Death: " . $mcUser . " " . $meansOfDeath . " " . $secondEntity . "\n";
+		
+	}
 }
 
 $addonMinecraftStats = new addonMinecraftStats();
 
-$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'has connected$', $addonMinecraftStats, 'manageLine');
-$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'has disconnected:', $addonMinecraftStats, 'manageLine');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'has connected$', $addonMinecraftStats, 'manageConnection');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'has disconnected:', $addonMinecraftStats, 'manageConnection');
 $irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^!mcstats', $addonMinecraftStats, 'displayStats');
+// Death
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ went up in flames$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ burned to death$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ tried to swim in lava$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ suffocated in a wall$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ drowned$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ starved to death$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was pricked to death$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ hit the ground too hard$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ fell out of the world$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ died$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ blew up$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was killed by magic$', $addonMinecraftStats, 'death');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was slain by \w+$', $addonMinecraftStats, 'deathMob');
+// $irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was slain by \w+$', $addonMinecraftStats, 'deathMob');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was shot by \w+$', $addonMinecraftStats, 'deathMob');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was fireballed by \w+$', $addonMinecraftStats, 'deathMob');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was pummeled by \w+$', $addonMinecraftStats, 'deathMob');
+$irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL,'^\w+ was killed by \w+$', $addonMinecraftStats, 'deathMob');
+
+
+
+
+
+

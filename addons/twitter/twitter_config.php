@@ -9,7 +9,7 @@ $this->setFriends(array(
 		'C418',
 		'Kappische',
 ));
-$this->setChannel('#ubuntu-uk-minecraft');
+$this->setChannel('##bitfolk-minecraft');
 
 $this->setAutoStart(true); // setting to true will only work if oauth has been completed
 

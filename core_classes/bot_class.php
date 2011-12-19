@@ -44,37 +44,64 @@ class tigBase
 	
 	public function sec2hms ($sec, $padHours = false) 
 	{
-	
+		$one_second = 1;
+		$one_minute = $one_second * 60;
+		$one_hour = $one_minute * 60;
+		$one_day = $one_hour * 24;
+		$one_week = $one_day * 7;
+		$one_month = $one_day * 4.3482142;
+		$one_year = $one_month * 12;
+		
 		// start with a blank string
-		$hms = "";
+		$ymwdhms = "";
 		
-		// do the hours first: there are 3600 seconds in an hour, so if we divide
-		// the total number of seconds by 3600 and throw away the remainder, we're
-		// left with the number of hours in those seconds
-		$hours = intval(intval($sec) / 3600); 
+		// years
+		if ($sec > $one_year)
+		{
+			$years = intval(intval($sec) / $one_year);
+			$ymwdhms .= $years . " year" . (($years > 1) ? "s " : " ");
+			$sec = $sec - ($years * $one_year);
+		}
 		
-		// add hours to $hms (with a leading 0 if asked for)
-		$hms .= ($padHours) 
+		// months
+		if ($sec > $one_month)
+		{
+			$months = intval(intval($sec) / $one_month);
+			$ymwdhms .= $months . " month" . (($months > 1) ? "s " : " ");
+			$sec = $sec - ($months * $one_month);
+		}
+		
+		// weeks
+		if ($sec > $one_week)
+		{
+			$weeks = intval(intval($sec) / $one_week);
+			$ymwdhms .= $weeks . " week" . (($weeks > 1) ? "s " : " ");
+			$sec = $sec - ($weeks * $one_week);
+		}
+		
+		// days
+		if ($sec > $one_day)
+		{
+			$days = intval(intval($sec) / $one_day);
+			$ymwdhms .= $days . " day" . (($days > 1) ? "s " : " ");
+			$sec = $sec - ($days * $one_day);
+		}
+		
+		$hours = intval(intval($sec) / $one_hour);
+		
+		$ymwdhms .= ($padHours) 
 			? str_pad($hours, 2, "0", STR_PAD_LEFT). ":"
 			: $hours. ":";
 		
-		// dividing the total seconds by 60 will give us the number of minutes
-		// in total, but we're interested in *minutes past the hour* and to get
-		// this, we have to divide by 60 again and then use the remainder
 		$minutes = intval(($sec / 60) % 60); 
 		
-		// add minutes to $hms (with a leading 0 if needed)
-		$hms .= str_pad($minutes, 2, "0", STR_PAD_LEFT). ":";
+		$ymwdhms .= str_pad($minutes, 2, "0", STR_PAD_LEFT). ":";
 		
-		// seconds past the minute are found by dividing the total number of seconds
-		// by 60 and using the remainder
 		$seconds = intval($sec % 60); 
 		
-		// add seconds to $hms (with a leading 0 if needed)
-		$hms .= str_pad($seconds, 2, "0", STR_PAD_LEFT);
+		$ymwdhms .= str_pad($seconds, 2, "0", STR_PAD_LEFT);
 		
-		// done!
-		return $hms;
+		return $ymwdhms;
 		
 	}
 
