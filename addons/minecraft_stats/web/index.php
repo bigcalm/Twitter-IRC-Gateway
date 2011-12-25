@@ -139,6 +139,12 @@ class Minecraft {
 			{
 				$minecraftUsers[$row['user_nick']]['connections']++;
 				
+				if (!isset($minecraftUsers[$row['user_nick']]['first_connected']))
+					$minecraftUsers[$row['user_nick']]['first_connected'] = strtotime($row['created_at']);
+				if (strtotime($row['created_at']) < $minecraftUsers[$row['user_nick']]['first_connected'])
+					$minecraftUsers[$row['user_nick']]['first_connected'] = strtotime($row['created_at']);
+				
+				
 				if (!isset($minecraftUsers[$row['user_nick']]['last_connected']))
 					$minecraftUsers[$row['user_nick']]['last_connected'] = strtotime($row['created_at']);
 					
@@ -172,6 +178,7 @@ class Minecraft {
 			$minecraftUser->setBotName($result['bot_name']);
 			$minecraftUser->setConnections($result['connections']);
 			$minecraftUser->setDisconnections($result['disconnections']);
+			$minecraftUser->setFirstConnected($result['first_connected']);
 			$minecraftUser->setLastConnected($result['last_connected']);
 			$minecraftUser->setLastDisconnected($result['last_disconnected']);
 			$minecraftUser->setDeaths($result['deaths']);
@@ -216,6 +223,7 @@ class MinecraftUser extends Minecraft
 	private $connections;
 	private $disconnections;
 	private $deaths;
+	private $first_connected;
 	private $last_connected;
 	private $last_disconnected;
 	private $time_connected;
@@ -234,6 +242,9 @@ class MinecraftUser extends Minecraft
 	
 	public function getDeaths() { return $this->deaths; }
 	public function setDeaths($deaths) { $this->deaths = $deaths; }
+	
+	public function getFirstConnected() { return $this->first_connected; }
+	public function setFirstConnected($first_connected) { $this->first_connected = $first_connected; }
 	
 	public function getLastConnected() { return $this->last_connected; }
 	public function setLastConnected($last_connected) { $this->last_connected = $last_connected; }
@@ -277,6 +288,14 @@ function cmpConnections($a, $b)
 	return ($a->getConnections() < $b->getConnections()) ? -1 : 1;
 }
 
+function cmpFirstConnected($a, $b)
+{
+	if(  $a->getFirstConnected() ==  $b->getFirstConnected() ){
+		return 0 ;
+	}
+	return ($a->getFirstConnected() < $b->getFirstConnected()) ? -1 : 1;
+}
+
 function cmpLastConnected($a, $b)
 {
 	if(  $a->getLastConnected() ==  $b->getLastConnected() ){
@@ -317,6 +336,7 @@ function cmpDeaths($a, $b)
 	$direction = array(
 		'username' => 'asc',
 		'connections' => 'desc',
+		'first_connected' => 'desc',
 		'last_connected' => 'desc',
 		'last_discconnected' => 'desc',
 		'time_connected' => 'desc',
@@ -326,7 +346,7 @@ function cmpDeaths($a, $b)
 	if (!isset($_GET['order_by']))
 		$_GET['order_by'] = 'username';
 	
-	if (!in_array($_GET['order_by'], array('username', 'connections', 'last_connected', 'last_disconnected', 'time_connected', 'deaths')))
+	if (!in_array($_GET['order_by'], array_keys($direction)))
 		$_GET['order_by'] = 'username';
 	
 	if (!isset($_GET['direction']))
@@ -353,6 +373,16 @@ function cmpDeaths($a, $b)
 			usort($minecraftUsers, 'cmpConnections');
 			
 			if ($direction['connections'] == 'desc')
+				$minecraftUsers = array_reverse($minecraftUsers);
+			
+			break;
+		
+		case "first_connected":
+			$options['order_by'] = 'first_connected';
+			$direction['first_connected'] = ($_GET['direction'] == 'asc') ? 'desc' : 'asc';
+			usort($minecraftUsers, 'cmpFirstConnected');
+			
+			if ($direction['first_connected'] == 'desc')
 				$minecraftUsers = array_reverse($minecraftUsers);
 			
 			break;
@@ -418,6 +448,7 @@ function cmpDeaths($a, $b)
 				<tr>
 					<th><a href="?order_by=username&amp;direction=<?php echo $direction['username']; ?>">Username</a></th>
 					<th><a href="?order_by=connections&amp;direction=<?php echo $direction['connections']; ?>">Connections</a></th>
+					<th><a href="?order_by=first_connected&amp;direction=<?php echo $direction['first_connected']; ?>">First connected</a></th>
 					<th><a href="?order_by=last_connected&amp;direction=<?php echo $direction['last_connected']; ?>">Last connected</a></th>
 					<th><a href="?order_by=last_disconnected&amp;direction=<?php echo $direction['last_disconnected']; ?>">Last disconnected</a></th>
 					<th><a href="?order_by=time_connected&amp;direction=<?php echo $direction['time_connected']; ?>">Time connected</a></th>
@@ -429,6 +460,7 @@ function cmpDeaths($a, $b)
 				<tr>
 					<td><?php echo $minecraftUser->getUserNick(); ?></td>
 					<td><?php echo $minecraftUser->getConnections(); ?></td>
+					<td><?php echo date("jS M Y, H:i:s", $minecraftUser->getFirstConnected()); ?></td>
 					<td><?php echo date("jS M Y, H:i:s", $minecraftUser->getLastConnected()); ?></td>
 					<td><?php echo date("jS M Y, H:i:s", $minecraftUser->getLastDisconnected()); ?></td>
 					<td><?php //echo $minecraftUser->; ?></td>
