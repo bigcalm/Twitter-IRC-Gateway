@@ -37,7 +37,7 @@ class addonMinecraftStats extends botController
 		
 		$this->mdb2 =& MDB2::connect($this->mdb2_dsn, $this->mdb2_options);
 		if (PEAR::isError($this->mdb2)) {
-			die('Factoids Addon error: ' . $this->mdb2->getMessage() . "\n");
+			die('Minecraft Stats Addon error: ' . $this->mdb2->getMessage() . "\n");
 		}
 	}
 	
@@ -172,6 +172,7 @@ class addonMinecraftStats extends botController
 		
 		
 	// -- calculate number of disconnections
+		/*
 		$disconnectionStatsSql = 'SELECT COUNT(*) AS disconnections FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" AND `action` = "disconnection";';
 		$queryResult = $this->mdb2->query($disconnectionStatsSql);
 		
@@ -184,6 +185,7 @@ class addonMinecraftStats extends botController
 		{
 			$displayResults[] = 'Disconnections: ' . $statsRow['disconnections'];
 		}
+		*/
 		
 		
 		
@@ -285,7 +287,7 @@ class addonMinecraftStats extends botController
 		$deathSql = 'INSERT INTO ' . $this->getTablePrefix() . 'minecraft_stats SET bot_name = "' . $this->mdb2->escape($botNick). '", user_nick = "' . $this->mdb2->escape($mcUser). '", `action` = "death", notes = "' . $this->mdb2->escape($meansOfDeath) . '"';
 		
 		if ($secondEntity !== false)
-			$deathSql .= ', secondEntity = "' . $this->mdb2->escape($secondEntity) . '"';
+			$deathSql .= ', second_entity = "' . $this->mdb2->escape($secondEntity) . '"';
 		
 		$deathSql .= ';';
 		
