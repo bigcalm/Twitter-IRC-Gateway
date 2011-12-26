@@ -274,10 +274,10 @@ class Tools
 
 function cmpUserNick($a, $b)
 {
-	if(  $a->getUserNick() ==  $b->getUserNick() ){
+	if(  strtolower($a->getUserNick()) ==  strtolower($b->getUserNick()) ){
 		return 0 ;
 	}
-	return ($a->getUserNick() < $b->getUserNick()) ? -1 : 1;
+	return (strtolower($a->getUserNick()) < strtolower($b->getUserNick())) ? -1 : 1;
 }
 
 function cmpConnections($a, $b)
