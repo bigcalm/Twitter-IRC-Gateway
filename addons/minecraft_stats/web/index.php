@@ -338,7 +338,7 @@ function cmpDeaths($a, $b)
 		'connections' => 'desc',
 		'first_connected' => 'desc',
 		'last_connected' => 'desc',
-		'last_discconnected' => 'desc',
+		'last_disconnected' => 'desc',
 		'time_connected' => 'desc',
 		'deaths' => 'desc'
 	);
