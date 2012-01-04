@@ -160,8 +160,7 @@ class addonMinecraftStats extends botController
 		$queryResult = $this->mdb2->query($connectionStatsSql);
 		
 		if (PEAR::isError($queryResult)) {
-			$irc->message($data->type, $sendTo, "There was an error while fetching connection data on " . $mcUser);
-			return true;
+			return array("There was an error while fetching connection data on " . $mcUser);
 		}
 		
 		while ($queryResult && $statsRow = $queryResult->fetchRow(MDB2_FETCHMODE_ASSOC))

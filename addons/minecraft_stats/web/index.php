@@ -58,7 +58,9 @@ function cmpDeaths($a, $b)
 	return ($a->getDeaths() < $b->getDeaths()) ? -1 : 1;
 }
 
-?>
+?> 
+
+
 <?php
 	$minecraftUsers = Minecraft::getMinecraftUsers();
 	
@@ -190,9 +192,9 @@ function cmpDeaths($a, $b)
 				<tr>
 					<td><?php echo $minecraftUser->getUserNick(); ?></td>
 					<td><?php echo $minecraftUser->getConnections(); ?></td>
-					<td><?php echo date("jS M Y, H:i:s", $minecraftUser->getFirstConnected()); ?></td>
-					<td><?php echo date("jS M Y, H:i:s", $minecraftUser->getLastConnected()); ?></td>
-					<td><?php echo date("jS M Y, H:i:s", $minecraftUser->getLastDisconnected()); ?></td>
+					<td title="<?php echo date("jS M Y H:i:s", $minecraftUser->getFirstConnected()); ?>"><?php echo Tools::compare_dates($minecraftUser->getFirstConnected()); ?></td>
+					<td title="<?php echo date("jS M Y H:i:s", $minecraftUser->getLastConnected()); ?>"><?php echo Tools::compare_dates($minecraftUser->getLastConnected()); ?></td>
+					<td title="<?php echo date("jS M Y H:i:s", $minecraftUser->getLastDisconnected()); ?>"><?php echo Tools::compare_dates($minecraftUser->getLastDisconnected()); ?></td>
 					<td><?php //echo $minecraftUser->; ?></td>
 					<td><?php echo $minecraftUser->getDeaths(); if ($minecraftUser->getDeaths() > 0): ?> [details]<?php endif; ?></td>
 				</tr>

@@ -6,7 +6,9 @@ $this->setMdb2Dsn(array(
 	'hostspec' => 'localhost',
 	'database' => 'tig_factoids'
 ));
-$this->setMdb2Options(array());
+$this->setMdb2Options(array(
+	'persistent' => true
+));
 
 $this->setTablePrefix('');
 
