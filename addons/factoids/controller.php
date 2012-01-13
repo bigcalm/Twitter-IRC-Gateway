@@ -38,7 +38,35 @@ class addonFactoid extends botController
 	}
 	
 	
-	function learn($irc, $data)
+	function reconnect()
+	{
+		$this->mdb2 =& MDB2::connect($this->mdb2_dsn, $this->mdb2_options);
+		if (PEAR::isError($this->mdb2)) {
+			echo 'Factoids Addon error: ' . $this->mdb2->getMessage() . "\n";
+		}
+	}
+	
+	function query($query)
+	{
+		$queryResult = $this->mdb2->query($query);
+		if (PEAR::isError($queryResult)) {
+			if (!$this->reconnect())
+			{
+				echo $this->mdb2->getMessage();
+				return false;
+			}
+				 
+			$queryResult = $this->mdb2->query($query);
+			if (PEAR::isError($queryResult)) {
+				return false;
+			}
+		}
+		
+		return $queryResult;
+	}
+
+        
+        function learn($irc, $data)
 	{
 		global $tigBase;
 		
@@ -58,7 +86,7 @@ class addonFactoid extends botController
 		$fact = trim(substr($message, $firstEqualPos + 1));
 		
 		$replaceSql = 'INSERT INTO ' . $this->getTablePrefix() . 'factoids SET `trigger` = "' . $this->mdb2->escape($trigger) . '", `content` = "' . $this->mdb2->escape($fact) . '", `created_by` = "' . $this->mdb2->escape($data->nick) . '"';
-		$queryResult = $this->mdb2->query($replaceSql);
+		$queryResult = $this->query($replaceSql);
 		
 		if ($data->channel != '')
 			$sendTo = $data->channel;
@@ -82,7 +110,7 @@ class addonFactoid extends botController
 		$trigger = trim($message);
 		
 		$deleteSql = 'UPDATE ' . $this->getTablePrefix() . 'factoids SET `is_active` = 0 WHERE `trigger` = "' . $this->mdb2->escape($trigger) . '"';
-		$queryResult = $this->mdb2->query($deleteSql);
+		$queryResult = $this->query($deleteSql);
 		
 		if ($data->channel != '')
 			$sendTo = $data->channel;
@@ -101,7 +129,7 @@ class addonFactoid extends botController
 		$trigger = trim($message);
 		
 		$selectSql = 'SELECT * FROM ' . $this->getTablePrefix() . 'factoids WHERE `is_active` = 1 AND `trigger` = "' . $this->mdb2->escape($trigger) . '" ORDER BY `created_at` DESC LIMIT 1';
-		$queryResult = $this->mdb2->query($selectSql);
+		$queryResult = $this->query($selectSql);
 		
 		if ($data->channel != '')
 			$sendTo = $data->channel;
@@ -120,7 +148,7 @@ class addonFactoid extends botController
 		global $tigBase;
 		
 		$triggerSelectSql = 'SELECT * FROM ' . $this->getTablePrefix() . 'factoids WHERE is_active = 1 GROUP BY `trigger` ORDER BY RAND() LIMIT 0,1;';
-		$queryResult = $this->mdb2->query($triggerSelectSql);
+		$queryResult = $this->query($triggerSelectSql);
 		if (PEAR::isError($queryResult)) {
 			return true;
 		}

@@ -35,18 +35,41 @@ class addonMinecraftStats extends botController
 	{
 		include_once 'mcstats_config.php';
 		
-		$this->mdb2 =& MDB2::connect($this->mdb2_dsn, $this->mdb2_options);
-		if (PEAR::isError($this->mdb2)) {
-			die('Minecraft Stats Addon error: ' . $this->mdb2->getMessage() . "\n");
-		}
+		$this->reconnect();
 	}
 	
 	
 	function __destruct()
 	{
-		
 	}
 	
+	
+	function reconnect()
+	{
+		$this->mdb2 =& MDB2::connect($this->mdb2_dsn, $this->mdb2_options);
+		if (PEAR::isError($this->mdb2)) {
+			echo 'Minecraft Stats Addon error: ' . $this->mdb2->getMessage() . "\n";
+		}
+	}
+	
+	function query($query)
+	{
+		$queryResult = $this->mdb2->query($query);
+		if (PEAR::isError($queryResult)) {
+			if (!$this->reconnect())
+			{
+				echo $this->mdb2->getMessage();
+				return false;
+			}
+				 
+			$queryResult = $this->mdb2->query($query);
+			if (PEAR::isError($queryResult)) {
+				return false;
+			}
+		}
+		
+		return $queryResult;
+	}
 	
 	public function manageConnection($irc, $data)
 	{
@@ -86,7 +109,7 @@ class addonMinecraftStats extends botController
 		global $tigBase;
 		
 		$addConnectionSql = 'INSERT INTO ' . $this->getTablePrefix() . 'minecraft_stats (bot_name, user_nick, action) VALUES ("' . $this->mdb2->escape($botNick) . '", "' . $this->mdb2->escape($mcUser) . '", "connection");';
-		$queryResult = $this->mdb2->query($addConnectionSql);
+		$queryResult = $this->query($addConnectionSql);
 		
 		if (DEBUG)
 			echo "[" . date("Y-M-D H:i:s") . "] Minecraft Addon: " . $mcUser . " connected to " . $botNick . "\n";
@@ -98,7 +121,7 @@ class addonMinecraftStats extends botController
 		global $tigBase;
 		
 		$addDisconnectionSql = 'INSERT INTO ' . $this->getTablePrefix() . 'minecraft_stats (bot_name, user_nick, action, notes) VALUES ("' . $this->mdb2->escape($botNick) . '", "' . $this->mdb2->escape($mcUser) . '", "disconnection", "' . $this->mdb2->escape($reason) . '");';
-		$queryResult = $this->mdb2->query($addDisconnectionSql);
+		$queryResult = $this->query($addDisconnectionSql);
 		
 		if (DEBUG)
 			echo "[" . date("Y-M-D H:i:s") . "] Minecraft Addon: " . $mcUser . " disconnected from " . $botNick . "\n";
@@ -126,7 +149,7 @@ class addonMinecraftStats extends botController
 			return true;
 			// all user stats required
 			$mcUsernamesSql = 'SELECT user_nick FROM ' . $this->getTablePrefix() . 'minecraft_stats GROUP BY user_nick ORDER BY user_nick ASC;';
-			$queryResult = $this->mdb2->query($mcUsernamesSql);
+			$queryResult = $this->query($mcUsernamesSql);
 			$mcUsers = array();
 			
 			if (PEAR::isError($queryResult)) {
@@ -157,9 +180,9 @@ class addonMinecraftStats extends botController
 		
 	// -- calculate number of connections
 		$connectionStatsSql = 'SELECT COUNT(*) AS connections FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" AND `action` = "connection";';
-		$queryResult = $this->mdb2->query($connectionStatsSql);
+		$queryResult = $this->query($connectionStatsSql);
 		
-		if (PEAR::isError($queryResult)) {
+		if (!$queryResult) {
 			return array("There was an error while fetching connection data on " . $mcUser);
 		}
 		
@@ -173,7 +196,7 @@ class addonMinecraftStats extends botController
 	// -- calculate number of disconnections
 		/*
 		$disconnectionStatsSql = 'SELECT COUNT(*) AS disconnections FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" AND `action` = "disconnection";';
-		$queryResult = $this->mdb2->query($disconnectionStatsSql);
+		$queryResult = $this->query($disconnectionStatsSql);
 		
 		if (PEAR::isError($queryResult)) {
 			$irc->message($data->type, $sendTo, "There was an error while fetching disconnection data on " . $mcUser);
@@ -190,7 +213,7 @@ class addonMinecraftStats extends botController
 		
 	// -- calculate total deaths
 		$deathStatsSql = 'SELECT COUNT(*) AS deaths FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" AND `action` = "death";';
-		$queryResult = $this->mdb2->query($deathStatsSql);
+		$queryResult = $this->query($deathStatsSql);
 		
 		if (PEAR::isError($queryResult)) {
 			$irc->message($data->type, $sendTo, "There was an error while fetching death data on " . $mcUser);
@@ -206,7 +229,7 @@ class addonMinecraftStats extends botController
 		
 	// -- calculate total time connected
 		$connectionTimesSql = 'SELECT * FROM ' . $this->getTablePrefix() . 'minecraft_stats WHERE user_nick = "' . $this->mdb2->escape($mcUser) . '" ORDER BY created_at ASC;';
-		$queryResult = $this->mdb2->query($connectionTimesSql);
+		$queryResult = $this->query($connectionTimesSql);
 		
 		if (PEAR::isError($queryResult)) {
 			$irc->message($data->type, $sendTo, "There was an error while fetching connection data on " . $mcUser);
@@ -290,7 +313,7 @@ class addonMinecraftStats extends botController
 		
 		$deathSql .= ';';
 		
-		$deathRes = $this->mdb2->query($deathSql);
+		$deathRes = $this->query($deathSql);
 		if (DEBUG)
 			echo "[" . date("Y-M-D H:i:s") . "] Minecraft Addon: Death: " . $mcUser . " " . $meansOfDeath . " " . $secondEntity . "\n";
 		
