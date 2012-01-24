@@ -333,7 +333,7 @@ class executeThread extends PHP_Fork {
 				$first = true;
 				foreach ($oauthParameters as $key => $value)
 				{
-					$request .= ($fist) ? ' ' : ', ';
+					$request .= ($first) ? ' ' : ', ';
 					$request .= OAuthUtil::urlencode_rfc3986($key) . '="' . OAuthUtil::urlencode_rfc3986($value) . '"';
 				}
 				
