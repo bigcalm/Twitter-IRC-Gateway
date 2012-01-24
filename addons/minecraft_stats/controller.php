@@ -240,7 +240,7 @@ class addonMinecraftStats extends botController
 		$counter = 0;
 		while ($queryResult && $connectionTimeRow = $queryResult->fetchRow(MDB2_FETCHMODE_ASSOC))
 		{
-			if (!is_array($connectionTimePairs[$counter]))
+			if (!isset($connectionTimePairs[$counter]))
 				$connectionTimePairs[$counter] = array();
 			
 			if ($connectionTimeRow['action'] == 'connection')
