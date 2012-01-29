@@ -56,15 +56,26 @@ class addonMinecraftStats extends botController
 	{
 		$queryResult = $this->mdb2->query($query);
 		if (PEAR::isError($queryResult)) {
-			if (!$this->reconnect())
-			{
-				echo $this->mdb2->getMessage();
-				return false;
+
+			try {
+				if (!$this->reconnect())
+				{
+					throw new Exception('DB connection issue');
+//						echo $this->mdb2->getMessage();
+					return false;
+				}
+			} catch (Exception $e) {
+				die ('Oops 1: ' . $e->getMessage());
 			}
-				 
-			$queryResult = $this->mdb2->query($query);
-			if (PEAR::isError($queryResult)) {
-				return false;
+
+			try {
+				$queryResult = $this->mdb2->query($query);
+				if (PEAR::isError($queryResult)) {
+					throw new Exception('DB connection issue');
+					return false;
+				}
+			} catch (Exception $e) {
+				die ('Oops 2: ' . $e->getMessage());
 			}
 		}
 		
